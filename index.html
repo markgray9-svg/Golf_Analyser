@@ -69,7 +69,7 @@ body{background:#fff;color:#000;padding:0;font-size:8pt}
 <section class="pg on" id="pg-r"><div id="chips"></div><div id="rd"></div></section>
 <section class="pg" id="pg-a"><div id="an"></div></section>
 <section class="pg" id="pg-t">
-<div class="card"><div class="ttl">Export</div><p class="mut">Opens your browser's print dialog – choose “Save as PDF” (landscape). Includes every round with data in spreadsheet-style tables.</p><button class="btn" id="bp">Export to PDF</button></div>
+<div class="card"><div class="ttl">Export</div><p class="mut">Opens your browser's print dialog – choose “Save as PDF” (A4, landscape). Exports the Analysis page only: Round Summary, % Summary and Trend for every round with data (10 rounds per page).</p><button class="btn" id="bp">Export to PDF</button></div>
 <div class="card"><div class="ttl">Clear data</div><p class="mut">All formulas stay in place; only entered values are removed.</p><button class="btn o" id="bcr">Clear current round</button><button class="btn r" id="bca">Clear ALL rounds</button></div>
 <p class="mut">Data is saved automatically on this device and browser.</p>
 </section></main>
@@ -129,8 +129,8 @@ function ask(t,m,ok,fn){$('#mt').textContent=t;$('#mm').textContent=m;$('#mo').t
 function clearRound(){ask(`Clear Round ${S.sel+1}?`,'All values entered for this round will be removed. Calculations remain.','Clear round',()=>{S.R[S.sel]=blank();save();renderRound()})}
 $('#bcr').onclick=()=>{show('r');clearRound()};
 $('#bca').onclick=()=>ask('⚠️ Clear ALL data?','This permanently removes the data for all 20 rounds and cannot be undone.','Yes, clear everything',()=>{S={sel:0,R:Array.from({length:20},blank)};save();renderRound();show('r')});
-$('#bp').onclick=()=>{const idx=S.R.map((r,i)=>has(r)?i:-1).filter(i=>i>=0);let h=`<h1>Golf Round Analyser <small style="font-size:9pt;font-weight:400">– ${new Date().toLocaleDateString('en-GB')}</small></h1>`;
-if(!idx.length)h+='<p>No data entered.</p>';for(let i=0;i<idx.length;i+=10)h+=`<div class="${i+10<idx.length?'pb':''}">${grid(idx.slice(i,i+10),true)}</div>`;
+$('#bp').onclick=()=>{const idx=S.R.map((r,i)=>has(r)?i:-1).filter(i=>i>=0);let h=`<h1>Golf Round Analyser – Analysis <small style="font-size:9pt;font-weight:400">– ${new Date().toLocaleDateString('en-GB')}</small></h1>`;
+if(!idx.length)h+='<p>No data entered.</p>';for(let i=0;i<idx.length;i+=10)h+=`<div class="${i+10<idx.length?'pb':''}">${grid(idx.slice(i,i+10),false)}</div>`;
 $('#print').innerHTML=h;try{window.print()}catch(e){ask('Print unavailable','Your browser blocked printing from this page. Open the link in your phone browser and try again.','OK',()=>{})}};
 renderRound();
 </script></body></html>
