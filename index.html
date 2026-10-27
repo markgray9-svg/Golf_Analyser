@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Golf Round Analyser</title>
+<style>
+:root{--bg:#f3f6f2;--card:#fff;--tx:#1b2a1e;--mut:#667a69;--ac:#2e7d32;--in:#e2efda;--ye:#fff59d;--bd:#d3dcd1;--red:#c62828;--hd:#2e7d32;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111611;--card:#1a221b;--tx:#e6ede6;--mut:#9aab9c;--ac:#66bb6a;--in:#2c472f;--ye:#5a5220;--bd:#314032;--red:#ff7b7b;--hd:#1f5a24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111611;--card:#1a221b;--tx:#e6ede6;--mut:#9aab9c;--ac:#66bb6a;--in:#2c472f;--ye:#5a5220;--bd:#314032;--red:#ff7b7b;--hd:#1f5a24;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:76px}
+header{background:var(--hd);color:#fff;padding:12px 16px;font-weight:700;font-size:18px}
+main{max-width:640px;margin:0 auto;padding:10px}
+main.wide{max-width:none}
+.pg{display:none}.pg.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
+.ttl{font-weight:700;font-size:17px;margin-bottom:8px}
+#chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px}
+.rc{flex:0 0 auto;min-width:42px;height:42px;border-radius:21px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-weight:600;font-size:15px;position:relative}
+.rc.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.rc.d::after{content:"";position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;background:#f9a825}
+.top{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.top label,.nums label,.ro{font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:3px}
+.ro b{font-size:22px;color:var(--tx);padding:4px 0}
+input[type=number]{width:100%;height:44px;border:1px solid var(--bd);border-radius:8px;padding:0 10px;font-size:18px;color:var(--tx)}
+.g{background:var(--in)}.y{background:var(--ye)}
+details.hole{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;padding:0 12px}
+summary{display:flex;justify-content:space-between;align-items:center;padding:13px 0;font-weight:700;cursor:pointer}
+summary span{font-weight:500;font-size:13px;color:var(--mut)}
+.sec{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ck input{position:absolute;opacity:0}
+.ck{position:relative;display:block}
+.ck span{display:flex;align-items:center;min-height:44px;padding:0 10px;border:1px solid var(--bd);border-radius:10px;font-size:14px;background:var(--bg)}
+.ck input:checked+span{background:var(--in);border-color:var(--ac);font-weight:700}
+.ck input:checked+span::before{content:"✓ ";color:var(--ac)}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
+.btn{display:block;width:100%;min-height:48px;border-radius:10px;border:1px solid var(--ac);background:var(--ac);color:#fff;font-size:16px;font-weight:600;margin:8px 0}
+.btn.o{background:var(--card);color:var(--ac)}.btn.r{background:var(--card);color:var(--red);border-color:var(--red)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;height:60px;border:0;background:none;color:var(--mut);font-size:13px;font-weight:600}
+nav button.on{color:var(--ac)}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
+#md.on{display:flex}#md .card{max-width:360px;width:100%}
+.sc{overflow-x:auto;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
+table.t{border-collapse:collapse;font-size:13px;width:100%}
+.t th,.t td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+.t th:first-child{text-align:left;position:sticky;left:0;background:var(--card);min-width:150px;font-weight:500}
+.t thead th{background:var(--hd);color:#fff;font-weight:700}
+.t tr.sec td{background:var(--in);font-weight:700;text-align:left}
+.t td.g{background:var(--in)}.t td.y{background:var(--ye)}
+.neg{color:var(--red)}
+.mut{color:var(--mut);font-size:14px}
+#print{display:none}
+@media print{
+@page{size:A4 landscape;margin:8mm}
+body>*:not(#print){display:none!important}
+body{background:#fff;color:#000;padding:0;font-size:8pt}
+#print{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#print h1{font-size:15pt;margin:0 0 4px}
+#print .t{font-size:7pt;--card:#fff;--bd:#bbb;--in:#e2efda;--ye:#fff59d;--hd:#2e7d32;--red:#c00;color:#000}
+#print .t th,#print .t td{padding:1px 4px}
+#print .t th:first-child{position:static;min-width:0;background:#fff}
+#print .pb{page-break-after:always}
+#print tr{page-break-inside:avoid}
+}
+</style></head><body>
+<header>⛳ Golf Round Analyser</header>
+<main id="mn">
+<section class="pg on" id="pg-r"><div id="chips"></div><div id="rd"></div></section>
+<section class="pg" id="pg-a"><div id="an"></div></section>
+<section class="pg" id="pg-t">
+<div class="card"><div class="ttl">Export</div><p class="mut">Opens your browser's print dialog – choose “Save as PDF” (landscape). Includes every round with data in spreadsheet-style tables.</p><button class="btn" id="bp">Export to PDF</button></div>
+<div class="card"><div class="ttl">Clear data</div><p class="mut">All formulas stay in place; only entered values are removed.</p><button class="btn o" id="bcr">Clear current round</button><button class="btn r" id="bca">Clear ALL rounds</button></div>
+<p class="mut">Data is saved automatically on this device and browser.</p>
+</section></main>
+<div id="print"></div>
+<div id="md"><div class="card"><div class="ttl" id="mt"></div><p id="mm"></p><button class="btn" id="mo"></button><button class="btn o" id="mc">Cancel</button></div></div>
+<nav><button data-t="r" class="on">✏️<br>Rounds</button><button data-t="a">📊<br>Analysis</button><button data-t="t">⚙️<br>Tools</button></nav>
+<script>
+const K=[['FH','Fairway hit'],['ML','Miss left'],['MR','Miss right'],['MP','Miss Par 3'],['AT','Approach on target'],['AL','Approach miss left'],['AR','Approach miss right'],['AS','Approach short'],['AO','Approach long']];
+const SK='golfRoundAnalyser.v1',SEED=[{"h":9,"p":4,"H":[["100010000",2,4],["001010000",2,5],["000000000",2,3],["001000010",3,6],["000100000",2,4],["100010000",2,4],["000000000",1,2],["100010000",3,6],["100010000",2,4],["100010000",2,5],["100000100",2,5],["100010000",2,4],["010000010",2,5],["100000100",2,5],["000100000",2,4],["100001000",3,6],["100000010",2,5],["100000010",1,5]]},{"h":10,"p":4,"H":[["100000001",2,5],["010000100",2,5],["000100000",1,3],["100000001",2,5],["000000000",2,3],["001000100",2,5],["000000000",2,3],["010010000",1,5],["010000010",2,5],["100010000",2,5],["001000010",2,5],["100001000",2,5],["001000010",2,6],["100010000",2,4],["000000000",2,3],["100000100",2,5],["100000001",1,4],["100000100",2,5]]}];
+const blank=()=>({h:'',p:4,H:Array.from({length:18},()=>({c:{},pt:'',sh:''}))});
+const seedR=s=>({h:String(s.h),p:s.p,H:s.H.map(([m,pt,sh])=>{const c={};m.split('').forEach((b,j)=>c[K[j][0]]=b=='1');return{c,pt:String(pt),sh:String(sh)}})});
+let S={sel:0,R:Array.from({length:20},blank)};
+SEED.forEach((s,i)=>S.R[i]=seedR(s));
+try{const j=localStorage.getItem(SK);if(j){const o=JSON.parse(j);if(o&&o.R&&o.R.length==20)S=o}}catch(e){}
+const save=()=>{try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),R=()=>S.R[S.sel];
+const has=r=>r.h!==''||r.H.some(h=>h.pt!==''||h.sh!==''||Object.values(h.c).some(Boolean));
+function calc(r){const n={};K.forEach(([k])=>n[k]=r.H.reduce((a,h)=>a+(h.c[k]?1:0),0));
+const sm=f=>r.H.reduce((a,h)=>a+(+h[f]||0),0);const o={n,pt:sm('pt'),sh:sm('sh'),p3:+r.p||0,hc:+r.h||0};o.fw=18-o.p3;o.net=o.sh-o.hc;return o}
+function renderRound(){const r=R();
+$('#chips').innerHTML=S.R.map((x,i)=>`<button class="rc${i==S.sel?' on':''}${has(x)?' d':''}" data-s="${i}">${i+1}</button>`).join('');
+const ck=(x,k)=>`<label class="ck"><input type="checkbox" data-k="${k[0]}"${x.c[k[0]]?' checked':''}><span>${k[1]}</span></label>`;
+let h=`<div class="card"><div class="ttl">Round ${S.sel+1}</div><div class="top"><label>Handicap<input class="g" type="number" inputmode="decimal" data-r="h" value="${r.h}"></label><label>Number of Par 3's<input class="y" type="number" inputmode="numeric" min="0" max="18" data-r="p" value="${r.p}"></label><div class="ro">Gross Score<b id="gr"></b></div><div class="ro">Net Score<b id="nt"></b></div></div></div>`;
+r.H.forEach((x,i)=>{h+=`<details class="hole" data-i="${i}"><summary>Hole ${i+1}<span id="hs${i}"></span></summary><div class="sec">Tee shot</div><div class="grid">${K.slice(0,4).map(k=>ck(x,k)).join('')}</div><div class="sec">Approach</div><div class="grid">${K.slice(4).map(k=>ck(x,k)).join('')}</div><div class="nums"><label>Number of putts<input class="g" type="number" inputmode="numeric" min="0" data-f="pt" value="${x.pt}"></label><label>Total shots<input class="g" type="number" inputmode="numeric" min="0" data-f="sh" value="${x.sh}"></label></div></details>`});
+h+=`<button class="btn r" id="bcl">Clear Round ${S.sel+1} data</button>`;$('#rd').innerHTML=h;refresh();$('#bcl').onclick=clearRound}
+function refresh(){const r=R(),c=calc(r);$('#gr').textContent=c.sh||'–';$('#nt').textContent=has(r)&&c.sh?c.net:'–';
+r.H.forEach((x,i)=>{const e=$('#hs'+i);if(e)e.textContent=x.sh!==''||x.pt!==''?`Shots ${x.sh||'–'} · Putts ${x.pt||'–'}`:'–'});
+document.querySelectorAll('.rc').forEach((b,i)=>b.classList.toggle('d',has(S.R[i])))}
+$('#pg-r').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){S.sel=+b.dataset.s;save();renderRound();window.scrollTo(0,0)}});
+$('#pg-r').addEventListener('input',e=>{const t=e.target,r=R();
+if(t.dataset.k){r.H[+t.closest('[data-i]').dataset.i].c[t.dataset.k]=t.checked}
+else if(t.dataset.f){r.H[+t.closest('[data-i]').dataset.i][t.dataset.f]=t.value}
+else if(t.dataset.r){r[t.dataset.r]=t.value}else return;save();refresh()});
+$('#pg-r').addEventListener('change',e=>{const t=e.target;if(t.dataset.r=='p'&&t.value===''){R().p=4;t.value=4;save();refresh()}});
+const fmt=v=>v==null?'–':v,pc=v=>v==null?'–':Math.round(v*100)+'%',tr=v=>v==null?'':v<0?`<span class="neg">(${Math.abs(v)})</span>`:v;
+const LAB=['Number of Fairways Hit','Number of Misses Left','Number of Misses Right','Number of Misses Par3','Number of Approach shot on target','Number of Approaches miss left','Number of Approaches miss right','Number of Approaches short','Number of Approaches long'];
+const PL=['% Fairways Hit','% Fairway Misses Left','% Fairway Misses Right','% Miss Par3','% Approach shot on target','% Approach miss left','% Approach miss right','% Approach short','% Approach long'];
+const TL=['Number of Fairways Hit','Number of Misses Left','Number of Misses Right','Number of Misses long (par3)','Number of Approach shot on target','Number of Approach miss left','Number of Approach miss right','Number of Approach short','Number of Approach long'];
+const DIR=[1,-1,-1,-1,1,-1,-1,-1,-1];
+function grid(idx,holes){const D=S.R.map(has),C=S.R.map(calc),pv=i=>{for(let j=i-1;j>=0;j--)if(D[j])return j;return -1};
+const n=idx.length+1,sec=t=>`<tr class="sec"><td colspan="${n}">${t}</td></tr>`;
+const row=(l,f,cl='')=>`<tr><th>${l}</th>${idx.map(i=>`<td class="${cl}">${f(i)}</td>`).join('')}</tr>`;
+let h=`<table class="t"><thead><tr><th></th>${idx.map(i=>`<th>Round ${i+1}</th>`).join('')}</tr></thead><tbody>`;
+h+=row('Handicap',i=>S.R[i].h===''?'–':S.R[i].h,'g')+row('Gross Score',i=>C[i].sh)+row('Net Score',i=>C[i].net)+row("Number of Par 3's",i=>C[i].p3,'y');
+if(holes)S.R[0].H.forEach((_,k)=>{h+=sec('Hole '+(k+1));K.forEach(([c,l])=>h+=row(l,i=>S.R[i].H[k].c[c]?'✓':''));h+=row('Number of putts',i=>S.R[i].H[k].pt,'g')+row('Total Shots',i=>S.R[i].H[k].sh,'g')});
+h+=sec('Round Summary');K.forEach(([k],j)=>h+=row(LAB[j],i=>C[i].n[k]));h+=row('Total Number of putts',i=>C[i].pt)+row('Total Shots',i=>C[i].sh);
+h+=sec('% Summary');K.forEach(([k],j)=>h+=row(PL[j],i=>{const d=k=='MP'?C[i].p3:C[i].fw;return pc(d>0?C[i].n[k]/d:null)}));h+=row('% Number of putts',i=>pc(C[i].sh>0?C[i].pt/C[i].sh:null));
+h+=sec('Trend Better/(Worse) than Previous');
+const t=(f,d)=>i=>{const p=pv(i);if(p<0)return '';const a=f(C[i]),b=f(C[p]);return tr(d>0?a-b:b-a)};
+K.forEach(([k],j)=>h+=row(TL[j],t(c=>c.n[k],DIR[j])));h+=row('Number of putts',t(c=>c.pt,-1))+row('Total Shots',t(c=>c.sh,-1));
+return h+'</tbody></table>'}
+function renderAn(){const idx=S.R.map((r,i)=>has(r)?i:-1).filter(i=>i>=0);
+$('#an').innerHTML=idx.length?`<p class="mut">Showing ${idx.length} round(s) with data. Trend compares each round with the previous round entered.</p><div class="sc">${grid(idx,false)}</div>`:'<div class="card">No round data yet. Enter a round on the Rounds tab.</div>'}
+function show(t){document.querySelectorAll('.pg').forEach(p=>p.classList.toggle('on',p.id=='pg-'+t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));$('#mn').classList.toggle('wide',t=='a');if(t=='a')renderAn();window.scrollTo(0,0)}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+function ask(t,m,ok,fn){$('#mt').textContent=t;$('#mm').textContent=m;$('#mo').textContent=ok;$('#md').classList.add('on');$('#mo').onclick=()=>{$('#md').classList.remove('on');fn()};$('#mc').onclick=()=>$('#md').classList.remove('on')}
+function clearRound(){ask(`Clear Round ${S.sel+1}?`,'All values entered for this round will be removed. Calculations remain.','Clear round',()=>{S.R[S.sel]=blank();save();renderRound()})}
+$('#bcr').onclick=()=>{show('r');clearRound()};
+$('#bca').onclick=()=>ask('⚠️ Clear ALL data?','This permanently removes the data for all 20 rounds and cannot be undone.','Yes, clear everything',()=>{S={sel:0,R:Array.from({length:20},blank)};save();renderRound();show('r')});
+$('#bp').onclick=()=>{const idx=S.R.map((r,i)=>has(r)?i:-1).filter(i=>i>=0);let h=`<h1>Golf Round Analyser <small style="font-size:9pt;font-weight:400">– ${new Date().toLocaleDateString('en-GB')}</small></h1>`;
+if(!idx.length)h+='<p>No data entered.</p>';for(let i=0;i<idx.length;i+=10)h+=`<div class="${i+10<idx.length?'pb':''}">${grid(idx.slice(i,i+10),true)}</div>`;
+$('#print').innerHTML=h;try{window.print()}catch(e){ask('Print unavailable','Your browser blocked printing from this page. Open the link in your phone browser and try again.','OK',()=>{})}};
+renderRound();
+</script></body></html>
